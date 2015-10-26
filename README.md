@@ -8,7 +8,7 @@ Add the following to your `project.clj`:
 
 Then you have to install the adapter:
 
-```
+```clojure
 (ns core
   (:require [hugsql.core :as hugsql]
             [hugsql.adapter.postgres-async :as ps-adapter]))
