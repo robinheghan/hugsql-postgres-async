@@ -4,7 +4,7 @@
 
 Add the following to your `project.clj`:
 
-[![Clojars Project](http://clojars.org/differ/latest-version.svg)](http://clojars.org/skinney/hugsql-adapter-postgres-async)
+[![Clojars Project](http://clojars.org/skinney/hugsql-adapter-postgres-async/latest-version.svg)](http://clojars.org/skinney/hugsql-adapter-postgres-async)
 
 Then you have to install the adapter:
 
