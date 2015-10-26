@@ -1,34 +1,46 @@
 (ns hugsql.adapter.postgres-async
   (:gen-class)
-  (:require [hugsql.adapter :as adapter]
+  (:require [clojure.core.async :refer [go <!]]
+            [hugsql.adapter :as adapter]
             [postgres.async :as ps]
-            [clojure.core.async :refer [go <!]]))
+            [clojure.string :as str]))
+
+(def params-regex #"(?<!\")\?(?!\")")
+
+(defn postgresify-query [original-query]
+  (loop [q original-query
+         c 1]
+    (let [new-q (str/replace-first q params-regex (str "\\$" c))]
+      (if (= q new-q)
+        q
+        (recur new-q (inc c))))))
+
+(defn- get-one [c]
+  (go
+    (let [res (<! c)]
+      (if (instance? Exception res)
+        res
+        (first res)))))
 
 (deftype HugsqlAdapterPostgresAsync []
 
   adapter/HugsqlAdapter
   (execute [this db sqlvec options]
-    (ps/execute! db sqlvec))
+    (let [postgres-vec (update sqlvec 0 postgresify-query)]
+      (ps/execute! db postgres-vec)))
 
   (query [this db sqlvec options]
-    (ps/query! db sqlvec))
+    (let [postgres-vec (update sqlvec 0 postgresify-query)]
+      (ps/query! db postgres-vec)))
 
   (result-one [this result options]
-    (go
-      (let [res (<! result)]
-        (if (instance? Exception res)
-          res
-          (first res)))))
+    (get-one result))
 
   (result-many [this result options]
     result)
 
   (result-affected [this result options]
-    (go
-      (let [res (<! result)]
-        (if (instance? Exception res)
-          res
-          (first res))))
+    (get-one result))
 
   (result-raw [this result options]
     result))
