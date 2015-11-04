@@ -19,6 +19,6 @@ Then you have to install the adapter:
 
 ## Usage
 
-The [HugSQL](https://github.com/layerware/hugsql) is the definetive guide. The only difference is that this adapter returns core.async channels, and that this adapter only works with postgres.
+The [HugSQL](https://github.com/layerware/hugsql) is the definitive guide. The only difference is that this adapter returns `core.async` channels and only works with postgres.
 
-Exceptions from the database are returned on the channel. Exceptions thrown by hugsql are not.
+Only exceptions from the database are returned on the channel. Exceptions thrown by `hugsql` are handled ... how - TBD?.
