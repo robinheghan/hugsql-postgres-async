@@ -1,13 +1,13 @@
 (ns hugsql.adapter.postgres-async
   (:gen-class)
-  (:require [clojure.core.async :refer [go <!]]
+  (:require [clojure.core.async :refer [go <! chan put! close!]]
             [hugsql.adapter :as adapter]
             [postgres.async :as ps]
             [clojure.string :as str]))
 
-(def params-regex #"(?<!\")\?(?!\")")
+(def ^:private ^:const params-regex #"(?<!\")\?(?!\")")
 
-(defn postgresify-query [original-query]
+(defn- postgresify-query [original-query]
   (loop [q original-query
          c 1]
     (let [new-q (str/replace-first q params-regex (str "\\$" c))]
@@ -23,7 +23,6 @@
         (first res)))))
 
 (deftype HugsqlAdapterPostgresAsync []
-
   adapter/HugsqlAdapter
   (execute [this db sqlvec options]
     (let [postgres-vec (update sqlvec 0 postgresify-query)]
@@ -43,7 +42,13 @@
     (get-one result))
 
   (result-raw [this result options]
-    result))
+    result)
+
+  (on-exception [this exception]
+    (let [c (chan 1)]
+      (put! c exception)
+      (close! c)
+      c)))
 
 (defn hugsql-adapter-postgres-async []
   (->HugsqlAdapterPostgresAsync))
