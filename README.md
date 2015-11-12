@@ -1,4 +1,4 @@
-# HugSQL adapter for postgres.async
+# postgres.async adapter for HugSQL
 
 ## Setup
 
@@ -13,12 +13,10 @@ Then you have to install the adapter:
   (:require [hugsql.core :as hugsql]
             [hugsql.adapter.postgres-async :as ps-adapter]))
 
-(hugsql/set-adapter! (ps-adapter/hugsql-adapter-postgres-async))
 (hugsql/def-db-fns "fns.sql")
+(hugsql/set-adapter! (ps-adapter/hugsql-adapter-postgres-async))
 ```
 
 ## Usage
 
-The [HugSQL](https://github.com/layerware/hugsql) is the definitive guide. The only difference is that this adapter returns `core.async` channels and only works with postgres.
-
-Only exceptions from the database are returned on the channel. Exceptions thrown by `hugsql` are handled ... how - TBD?.
+The [HugSQL](https://github.com/layerware/hugsql) documentation is the definitive guide. The difference is that this adapter returns `core.async` channels with the result or an exception. This adapter uses `postgres.async`, so naturally it only works with postgres.
