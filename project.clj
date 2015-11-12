@@ -1,4 +1,4 @@
-(defproject skinney/hugsql-adapter-postgres-async "0.3.0"
+(defproject skinney/hugsql-adapter-postgres-async "0.3.1-SNAPSHOT"
   :description "Postgres.async adapter for HugSQL"
   :url "https://github.com/Skinney/hugsql-async"
   :license {:name "Apache License, Version 2.0"
