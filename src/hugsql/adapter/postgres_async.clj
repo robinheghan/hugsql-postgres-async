@@ -1,6 +1,6 @@
 (ns hugsql.adapter.postgres-async
   (:gen-class)
-  (:require [clojure.core.async :refer [go <! chan put! close!]]
+  (:require [clojure.core.async :refer [chan put! take! close!]]
             [hugsql.adapter :as adapter]
             [postgres.async :as ps]
             [clojure.string :as str]))
@@ -15,12 +15,16 @@
         q
         (recur new-q (inc c))))))
 
-(defn- get-one [c]
-  (go
-    (let [res (<! c)]
-      (if (instance? Exception res)
-        res
-        (first res)))))
+(defn- get-one [result-chan]
+  (let [return-chan (chan)]
+    (take! result-chan (fn [res]
+                         (let [return (if (instance? Exception res)
+                                        res
+                                        (first res))]
+                           (if (nil? return)
+                             (close! return-chan)
+                             (put! return-chan return (fn [_] (close! return-chan)))))))
+    return-chan))
 
 (deftype HugsqlAdapterPostgresAsync []
   adapter/HugsqlAdapter
@@ -45,9 +49,8 @@
     result)
 
   (on-exception [this exception]
-    (let [c (chan 1)]
-      (put! c exception)
-      (close! c)
+    (let [c (chan)]
+      (put! c exception (fn [_] (close! c)))
       c)))
 
 (defn hugsql-adapter-postgres-async []
