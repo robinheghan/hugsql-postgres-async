@@ -23,7 +23,7 @@
                                         (first res))]
                            (if (nil? return)
                              (close! return-chan)
-                             (put! return-chan return (fn [_] (close! return-chan)))))))
+                             (put! return-chan return #(close! return-chan))))))
     return-chan))
 
 (deftype HugsqlAdapterPostgresAsync []
@@ -50,7 +50,7 @@
 
   (on-exception [this exception]
     (let [c (chan)]
-      (put! c exception (fn [_] (close! c)))
+      (put! c exception #(close! c))
       c)))
 
 (defn hugsql-adapter-postgres-async []
