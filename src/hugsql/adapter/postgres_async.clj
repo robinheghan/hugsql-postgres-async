@@ -17,13 +17,14 @@
 
 (defn- get-one [result-chan]
   (let [return-chan (chan)]
-    (take! result-chan (fn [res]
-                         (let [return (if (instance? Exception res)
-                                        res
-                                        (first res))]
-                           (if (nil? return)
-                             (close! return-chan)
-                             (put! return-chan return #(close! return-chan))))))
+    (take! result-chan
+      (fn [res]
+        (let [return (if (instance? Exception res)
+                       res
+                       (first res))]
+          (if (nil? return)
+            (close! return-chan)
+            (put! return-chan return (fn [_] (close! return-chan)))))))
     return-chan))
 
 (deftype HugsqlAdapterPostgresAsync []
